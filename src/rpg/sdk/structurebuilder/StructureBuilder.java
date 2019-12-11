@@ -1,14 +1,6 @@
 package rpg.sdk.structurebuilder;
 
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_DOWN;
-import static java.awt.event.KeyEvent.VK_LEFT;
-import static java.awt.event.KeyEvent.VK_RIGHT;
-import static java.awt.event.KeyEvent.VK_S;
-import static java.awt.event.KeyEvent.VK_SHIFT;
-import static java.awt.event.KeyEvent.VK_UP;
-import static java.awt.event.KeyEvent.VK_W;
+import static java.awt.event.KeyEvent.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -53,8 +45,8 @@ public class StructureBuilder implements Runnable
 	}
 	
 	// Global position
-	public double x, y;
 	public double gridSize = 128;
+	public double x = gridSize * 4, y = gridSize * 4;
 	
 	public double basePanSpeed = 1.0;
 	public double sprintMultiplier = 4.0;
@@ -95,11 +87,16 @@ public class StructureBuilder implements Runnable
 			g2d.setColor(Color.white);
 			g2d.fillRect(0, 0, width, height);
 			
+			// Draw neutral position
+			g2d.setColor(Color.green);
+			g2d.drawLine((int) (x + gridSize / 2 - gridSize), 0, (int) (x + gridSize / 2 - gridSize), height);
+			g2d.drawLine(0, (int) (y + gridSize / 2), width, (int) (y + gridSize / 2));
+			
 			// Draw grid
 			g2d.setColor(Color.blue);
 			
-			for(int x = (int) (this.x % gridSize); x < frame.getWidth(); x += gridSize)		g2d.drawLine(x, 0, x, frame.getHeight());
-			for(int y = (int) (this.y % gridSize); y < frame.getHeight(); y += gridSize)	g2d.drawLine(0, y, frame.getWidth(), y);
+			for(int x = (int) (this.x % gridSize); x < width; x += gridSize)	g2d.drawLine(x, 0, x, height);
+			for(int y = (int) (this.y % gridSize); y < height; y += gridSize)	g2d.drawLine(0, y, width, y);
 			
 			g2d.setColor(Color.red);
 			if(frame.isMouseInBounds())
@@ -109,20 +106,20 @@ public class StructureBuilder implements Runnable
 				catch(IllegalComponentStateException e) { System.exit(1); }
 				
 				// Highlight selected
-				int x = (int) (mouse.x / gridSize);
-				int y = (int) (mouse.y / gridSize);
+				Point tilePos = getAbsoluteGridPosition(mouse);
+				tilePos.y = -tilePos.y;
 				
-				x *= gridSize;
-				y *= gridSize;
+				tilePos.x *= gridSize;
+				tilePos.y *= gridSize;
 				
-				x += this.x % gridSize;
-				y += this.y % gridSize;
+				tilePos.x += x - gridSize;
+				tilePos.y += y;
 				
-				g2d.drawRect(x, y, (int) gridSize, (int) gridSize);
+				g2d.setColor(Color.red);
+				g2d.drawRect(tilePos.x, tilePos.y, (int) gridSize, (int) gridSize);
 				
 				// Draw info of position
-				Point tilePos = getAbsoluteGridPosition();
-				
+				tilePos = getAbsoluteGridPosition(mouse);
 				mouse.x += 10;
 				mouse.y -= 5;
 				StringTools.drawLine(g2d, "(" + tilePos.x + ", " + tilePos.y + ")", Color.white, 50, mouse, -1);
@@ -141,15 +138,18 @@ public class StructureBuilder implements Runnable
 		frame.dispose();
 	}
 	
-	public Point getAbsoluteGridPosition()
+	public Point getAbsoluteGridPosition(Point position)
 	{
-		Point mouse = frame.getMousePosition();
-		int x = (int) (mouse.x / gridSize);
-		int y = (int) (mouse.y / gridSize);
+		double x = position.getX();
+		double y = -position.getY();
 		
-		int absoluteX = (int) (-this.x / gridSize) + x;
-		int absoluteY = (int) (-this.y / gridSize) + y;
-		return new Point(absoluteX, absoluteY);
+		x /= gridSize;
+		y /= gridSize;
+		
+		x -= this.x / gridSize;
+		y += this.y / gridSize;
+		
+		return new Point((int) Math.round(x + 0.5), (int) Math.round(y + 0.5));
 	}
 	
 	// Static
