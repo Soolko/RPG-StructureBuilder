@@ -2,6 +2,9 @@ package rpg.sdk.structurebuilder;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.IllegalComponentStateException;
+import java.awt.MouseInfo;
+import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -15,16 +18,32 @@ public class StructureBuilderWindow extends JFrame
 	
 	public final JPanel renderPanel = new JPanel();
 	
-	/**
-	 * Create the frame.
-	 */
+	public Point getMousePosition() throws IllegalComponentStateException
+	{
+		Point mouse = MouseInfo.getPointerInfo().getLocation();
+		Point panel = renderPanel.getLocationOnScreen();
+		
+		return new Point(mouse.x - panel.x, mouse.y - panel.y);
+	}
+	
+	public boolean isMouseInBounds() { return isPointInBounds(getMousePosition()); }
+	public boolean isPointInBounds(Point point)
+	{
+		boolean outOfBounds = !renderPanel.isVisible();
+		outOfBounds |= point.x < 0;
+		outOfBounds |= point.y < 0;
+		outOfBounds |= point.x > renderPanel.getWidth();
+		outOfBounds |= point.y > renderPanel.getHeight();
+		
+		return !outOfBounds;
+	}
+	
 	public StructureBuilderWindow(String title)
 	{
 		setTitle(title);
 		setMinimumSize(new Dimension(640, 480));
 		setSize(1280, 720);
 		setLocationRelativeTo(null);
-		
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -37,5 +56,4 @@ public class StructureBuilderWindow extends JFrame
 		
 		getContentPane().add(renderPanel, BorderLayout.CENTER);
 	}
-
 }
