@@ -1,6 +1,14 @@
 package rpg.sdk.structurebuilder;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.VK_SHIFT;
+import static java.awt.event.KeyEvent.VK_UP;
+import static java.awt.event.KeyEvent.VK_W;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,6 +33,7 @@ import rpg.RPG;
 import rpg.rendering.ui.StringTools;
 import rpg.sdk.structurebuilder.objects.SaveableStructure;
 import rpg.sdk.structurebuilder.ui.MainWindow;
+import rpg.sdk.structurebuilder.ui.PalleteWindow;
 
 public class StructureBuilder implements Runnable
 {
@@ -39,7 +48,9 @@ public class StructureBuilder implements Runnable
 	public AtomicBoolean running = new AtomicBoolean(true);
 	
 	// Window
-	public final MainWindow frame = new MainWindow(new NewStructureAction());
+	public final PalleteWindow pallete = new PalleteWindow();
+	
+	public final MainWindow frame = new MainWindow(pallete, new NewStructureAction());
 	private class CloseListener implements WindowListener
 	{
 		@Override public void windowClosing(WindowEvent e) { running.set(false); }
@@ -185,6 +196,7 @@ public class StructureBuilder implements Runnable
 			g.dispose();
 		}
 		
+		pallete.dispose();
 		frame.renderPanel.setEnabled(false);
 		frame.dispose();
 	}
@@ -251,11 +263,11 @@ public class StructureBuilder implements Runnable
 			if(themeClass != null) UIManager.setLookAndFeel(themeClass);
 			else UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
-		catch(IllegalAccessException | InstantiationException e) { e.printStackTrace(); }
 		catch(ClassNotFoundException | UnsupportedLookAndFeelException e)
 		{
 			System.err.println("Detected GTK theme but was unable to set it.");
 			e.printStackTrace();
 		}
+		catch(IllegalAccessException | InstantiationException e) { e.printStackTrace(); }
 	}
 }

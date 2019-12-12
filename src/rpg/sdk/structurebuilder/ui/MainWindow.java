@@ -57,7 +57,7 @@ public class MainWindow extends JFrame
 		@Override public void menuCanceled(MenuEvent e)		{ shouldRender.set(true); }
 	};
 	
-	public MainWindow(ActionListener newButtonListener)
+	public MainWindow(PalleteWindow palleteWindow, ActionListener newButtonListener)
 	{
 		setTitle(StructureBuilder.title);
 		setMinimumSize(new Dimension(640, 480));
