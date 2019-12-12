@@ -131,7 +131,7 @@ public class StructureBuilder implements Runnable
 			// Render
 			Graphics2D g2d = canvas.createGraphics();
 			
-			g2d.setColor(Color.white);
+			g2d.setColor(Color.darkGray);
 			g2d.fillRect(0, 0, width, height);
 			
 			if(frame.gridActive())
@@ -142,8 +142,7 @@ public class StructureBuilder implements Runnable
 				g2d.drawLine(0, (int) (y + gridSize / 2), width, (int) (y + gridSize / 2));
 				
 				// Draw grid
-				g2d.setColor(Color.blue);
-				
+				g2d.setColor(Color.lightGray);
 				for(int x = (int) (this.x % gridSize); x < width; x += gridSize)	g2d.drawLine(x, 0, x, height);
 				for(int y = (int) (this.y % gridSize); y < height; y += gridSize)	g2d.drawLine(0, y, width, y);
 			}
@@ -161,21 +160,20 @@ public class StructureBuilder implements Runnable
 				g2d.setColor(Color.red);
 				g2d.drawRect(tilePos.x, tilePos.y, (int) gridSize, (int) gridSize);
 				
-				// Draw selected
-				g2d.setColor(Color.red);
-				if(selectedTile != null)
-				{
-					Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
-					
-					g2d.setColor(Color.cyan);;
-					g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
-				}
-				
 				// Draw info of position
 				tilePos = getAbsoluteGridPosition(mouse);
 				mouse.x += 10;
 				mouse.y -= 5;
 				StringTools.drawLine(g2d, "(" + tilePos.x + ", " + tilePos.y + ")", Color.white, 50, mouse, -1);
+			}
+			
+			// Draw selected
+			if(selectedTile != null)
+			{
+				Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
+				
+				g2d.setColor(Color.orange);
+				g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
 			}
 			
 			// Dispose
