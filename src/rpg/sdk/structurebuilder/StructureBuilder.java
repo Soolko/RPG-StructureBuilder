@@ -15,9 +15,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.UIManager;
@@ -26,21 +31,23 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import rpg.RPG;
 import rpg.rendering.ui.StringTools;
+import rpg.sdk.structurebuilder.objects.SaveableStructure;
 import rpg.sdk.structurebuilder.ui.MainWindow;
 
 public class StructureBuilder implements Runnable
 {
+	// Global
 	public static final String title = RPG.title + " - StructureBuilder";
+	
+	// Current working object
+	public File currentFile = null;
+	public SaveableStructure currentStructure = new SaveableStructure();
 	
 	// Thread
 	public AtomicBoolean running = new AtomicBoolean(true);
 	
 	// Window
-	public final MainWindow frame = new MainWindow();
-	public final Input input = new Input();
-	private int lastWindowX, lastWindowY;
-	
-	// Close event
+	public final MainWindow frame = new MainWindow(new NewStructureAction());
 	private class CloseListener implements WindowListener
 	{
 		@Override public void windowClosing(WindowEvent e) { running.set(false); }
@@ -53,10 +60,24 @@ public class StructureBuilder implements Runnable
 		@Override public void windowOpened(WindowEvent e) { }
 	}
 	
+	private class NewStructureAction implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			currentFile = null;
+			currentStructure = new SaveableStructure();
+		}
+	}
+	
+	public final Input input = new Input();
+	private int lastWindowX, lastWindowY;
+	
 	public StructureBuilder()
 	{
 		frame.addKeyListener(input);
-		frame.addWindowListener(this.new CloseListener());
+		frame.addMouseListener(new TileSelectListener());
+		frame.addWindowListener(new CloseListener());
 	}
 	
 	// Global position
@@ -66,6 +87,23 @@ public class StructureBuilder implements Runnable
 	public double basePanSpeed = 1.0;
 	public double sprintMultiplier = 4.0;
 	public double getPanSpeed() { return input.getKey(VK_SHIFT) ? basePanSpeed * sprintMultiplier : basePanSpeed; }
+	
+	public Point selectedTile = null;
+	
+	private class TileSelectListener implements MouseListener
+	{
+		@Override
+		public void mouseClicked(MouseEvent e)
+		{
+			if(frame.isMouseInBounds()) selectedTile = getAbsoluteGridPosition(frame.getMousePosition());
+			else selectedTile = null;
+		}
+		
+		@Override public void mouseEntered(MouseEvent e) { }
+		@Override public void mouseExited(MouseEvent e) { }
+		@Override public void mousePressed(MouseEvent e) { }
+		@Override public void mouseReleased(MouseEvent e) { }
+	}
 	
 	@Override
 	public synchronized void run()
@@ -78,6 +116,8 @@ public class StructureBuilder implements Runnable
 		BufferedImage canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		while(running.get())
 		{
+			if(!frame.shouldRender.get()) continue;
+			
 			// Set window size if needed
 			width = frame.getWidth();
 			height = frame.getHeight();
@@ -120,15 +160,18 @@ public class StructureBuilder implements Runnable
 				try { mouse = frame.getMousePosition(); }
 				catch(IllegalComponentStateException e) { System.exit(1); }
 				
-				// Highlight selected
+				// Draw selected
+				if(selectedTile != null)
+				{
+					Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
+					
+					g2d.setColor(Color.cyan);;
+					g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
+				}
+				
+				// Highlight hovered
 				Point tilePos = getAbsoluteGridPosition(mouse);
-				tilePos.y = -tilePos.y;
-				
-				tilePos.x *= gridSize;
-				tilePos.y *= gridSize;
-				
-				tilePos.x += x - gridSize;
-				tilePos.y += y;
+				tilePos = tilePosToScreenSpace(tilePos);
 				
 				g2d.setColor(Color.red);
 				g2d.drawRect(tilePos.x, tilePos.y, (int) gridSize, (int) gridSize);
@@ -151,6 +194,21 @@ public class StructureBuilder implements Runnable
 		
 		frame.renderPanel.setEnabled(false);
 		frame.dispose();
+	}
+	
+	public Point tilePosToScreenSpace(Point tilePos)
+	{
+		Point newPos = (Point) tilePos.clone();
+		
+		newPos.y = -newPos.y;
+		
+		newPos.x *= gridSize;
+		newPos.y *= gridSize;
+		
+		newPos.x += x - gridSize;
+		newPos.y += y;
+		
+		return newPos;
 	}
 	
 	public Point getAbsoluteGridPosition(Point position)
