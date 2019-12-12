@@ -1,14 +1,6 @@
 package rpg.sdk.structurebuilder;
 
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_DOWN;
-import static java.awt.event.KeyEvent.VK_LEFT;
-import static java.awt.event.KeyEvent.VK_RIGHT;
-import static java.awt.event.KeyEvent.VK_S;
-import static java.awt.event.KeyEvent.VK_SHIFT;
-import static java.awt.event.KeyEvent.VK_UP;
-import static java.awt.event.KeyEvent.VK_W;
+import static java.awt.event.KeyEvent.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -142,32 +134,25 @@ public class StructureBuilder implements Runnable
 			g2d.setColor(Color.white);
 			g2d.fillRect(0, 0, width, height);
 			
-			// Draw neutral position
-			g2d.setColor(Color.green);
-			g2d.drawLine((int) (x + gridSize / 2 - gridSize), 0, (int) (x + gridSize / 2 - gridSize), height);
-			g2d.drawLine(0, (int) (y + gridSize / 2), width, (int) (y + gridSize / 2));
+			if(frame.gridActive())
+			{
+				// Draw neutral position
+				g2d.setColor(Color.green);
+				g2d.drawLine((int) (x + gridSize / 2 - gridSize), 0, (int) (x + gridSize / 2 - gridSize), height);
+				g2d.drawLine(0, (int) (y + gridSize / 2), width, (int) (y + gridSize / 2));
+				
+				// Draw grid
+				g2d.setColor(Color.blue);
+				
+				for(int x = (int) (this.x % gridSize); x < width; x += gridSize)	g2d.drawLine(x, 0, x, height);
+				for(int y = (int) (this.y % gridSize); y < height; y += gridSize)	g2d.drawLine(0, y, width, y);
+			}
 			
-			// Draw grid
-			g2d.setColor(Color.blue);
-			
-			for(int x = (int) (this.x % gridSize); x < width; x += gridSize)	g2d.drawLine(x, 0, x, height);
-			for(int y = (int) (this.y % gridSize); y < height; y += gridSize)	g2d.drawLine(0, y, width, y);
-			
-			g2d.setColor(Color.red);
 			if(frame.isMouseInBounds())
 			{
 				Point mouse = null;
 				try { mouse = frame.getMousePosition(); }
 				catch(IllegalComponentStateException e) { System.exit(1); }
-				
-				// Draw selected
-				if(selectedTile != null)
-				{
-					Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
-					
-					g2d.setColor(Color.cyan);;
-					g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
-				}
 				
 				// Highlight hovered
 				Point tilePos = getAbsoluteGridPosition(mouse);
@@ -175,6 +160,16 @@ public class StructureBuilder implements Runnable
 				
 				g2d.setColor(Color.red);
 				g2d.drawRect(tilePos.x, tilePos.y, (int) gridSize, (int) gridSize);
+				
+				// Draw selected
+				g2d.setColor(Color.red);
+				if(selectedTile != null)
+				{
+					Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
+					
+					g2d.setColor(Color.cyan);;
+					g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
+				}
 				
 				// Draw info of position
 				tilePos = getAbsoluteGridPosition(mouse);
