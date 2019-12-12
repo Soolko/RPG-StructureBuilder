@@ -1,6 +1,14 @@
 package rpg.sdk.structurebuilder;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.VK_SHIFT;
+import static java.awt.event.KeyEvent.VK_UP;
+import static java.awt.event.KeyEvent.VK_W;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -12,16 +20,23 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import rpg.RPG;
 import rpg.rendering.ui.StringTools;
+import rpg.sdk.structurebuilder.ui.MainWindow;
 
 public class StructureBuilder implements Runnable
 {
+	public static final String title = RPG.title + " - StructureBuilder";
+	
 	// Thread
 	public AtomicBoolean running = new AtomicBoolean(true);
 	
 	// Window
-	public final StructureBuilderWindow frame = new StructureBuilderWindow(RPG.title + " - Structure Builder");
+	public final MainWindow frame = new MainWindow();
 	public final Input input = new Input();
 	private int lastWindowX, lastWindowY;
 	
@@ -157,11 +172,39 @@ public class StructureBuilder implements Runnable
 	
 	public static void main(String[] args) throws InterruptedException
 	{
+		setTheme();
+		
 		instance = new StructureBuilder();
 		
 		Thread instanceThread = new Thread(instance);
 		instanceThread.start();
 		
 		instanceThread.join();
+	}
+	
+	private static void setTheme()
+	{
+		String themeClass = null;
+		for(LookAndFeelInfo theme : UIManager.getInstalledLookAndFeels())
+		{
+			String currentClass = theme.getClassName();
+			if(currentClass.endsWith("GTKLookAndFeel"))
+			{
+				themeClass = currentClass;
+				break;
+			}
+		}
+		
+		try
+		{
+			if(themeClass != null) UIManager.setLookAndFeel(themeClass);
+			else UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch(IllegalAccessException | InstantiationException e) { e.printStackTrace(); }
+		catch(ClassNotFoundException | UnsupportedLookAndFeelException e)
+		{
+			System.err.println("Detected GTK theme but was unable to set it.");
+			e.printStackTrace();
+		}
 	}
 }

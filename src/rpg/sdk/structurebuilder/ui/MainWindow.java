@@ -1,4 +1,4 @@
-package rpg.sdk.structurebuilder;
+package rpg.sdk.structurebuilder.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -11,12 +11,19 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 
-public class StructureBuilderWindow extends JFrame
+import rpg.sdk.structurebuilder.StructureBuilder;
+import javax.swing.JCheckBoxMenuItem;
+
+public class MainWindow extends JFrame
 {
 	private static final long serialVersionUID = 5564676569232749396L;
 	
 	public final JPanel renderPanel = new JPanel();
+	
+	private JCheckBoxMenuItem showGrid = new JCheckBoxMenuItem("Show Grid");
+	public boolean gridActive() { return showGrid.isSelected(); }
 	
 	public Point getMousePosition() throws IllegalComponentStateException
 	{
@@ -38,9 +45,9 @@ public class StructureBuilderWindow extends JFrame
 		return !outOfBounds;
 	}
 	
-	public StructureBuilderWindow(String title)
+	public MainWindow()
 	{
-		setTitle(title);
+		setTitle(StructureBuilder.title);
 		setMinimumSize(new Dimension(640, 480));
 		setSize(1280, 720);
 		setLocationRelativeTo(null);
@@ -51,8 +58,23 @@ public class StructureBuilderWindow extends JFrame
 		JMenu fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
 		
+		JMenuItem mntmNew = new JMenuItem("New");
+		fileMenu.add(mntmNew);
+		
+		JSeparator separator = new JSeparator();
+		fileMenu.add(separator);
+		
 		JMenuItem saveButton = new JMenuItem("Save");
 		fileMenu.add(saveButton);
+		
+		JMenuItem mntmLoad = new JMenuItem("Load");
+		fileMenu.add(mntmLoad);
+		
+		JMenu viewMenu = new JMenu("View");
+		menuBar.add(viewMenu);
+		
+		showGrid.setSelected(true);
+		viewMenu.add(showGrid);
 		
 		getContentPane().add(renderPanel, BorderLayout.CENTER);
 	}
