@@ -168,7 +168,7 @@ public class StructureBuilder implements Runnable
 				Point tilePos = getAbsoluteGridPosition(mouse);
 				tilePos = tilePosToScreenSpace(tilePos);
 				
-				g2d.setColor(Color.red);
+				g2d.setColor(ResourceManager.hoveredColour);
 				g2d.drawRect(tilePos.x, tilePos.y, (int) gridSize, (int) gridSize);
 				
 				// Draw info of position
@@ -183,7 +183,7 @@ public class StructureBuilder implements Runnable
 			{
 				Point selectedScreenSpace = tilePosToScreenSpace(selectedTile);
 				
-				g2d.setColor(Color.orange);
+				g2d.setColor(ResourceManager.selectedColour);
 				g2d.drawRect(selectedScreenSpace.x, selectedScreenSpace.y, (int) gridSize, (int) gridSize);
 			}
 			
